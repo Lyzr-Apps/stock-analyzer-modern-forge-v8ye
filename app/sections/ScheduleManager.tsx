@@ -39,22 +39,26 @@ export default function ScheduleManager({ emailConfigured, scheduleId, onSchedul
       if (result.success && Array.isArray(result.schedules)) {
         const found = result.schedules.find((s) => s.id === scheduleId)
         setSchedule(found ?? null)
-      } else {
-        setError(result.error ?? 'Failed to load schedule')
       }
+      // Don't show error for initial load failures - schedule may not exist yet
+    } catch {
+      // Silently handle - schedule data is supplementary
+    }
 
+    try {
       const logsResult = await getScheduleLogs(scheduleId, { limit: 5 })
       if (logsResult.success && Array.isArray(logsResult.executions)) {
         setLogs(logsResult.executions)
       }
     } catch {
-      setError('Failed to load schedule data')
+      // Silently handle - logs are supplementary
     }
     setLoading(false)
   }
 
   useEffect(() => {
     loadScheduleData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scheduleId])
 
   const handleToggle = async () => {
