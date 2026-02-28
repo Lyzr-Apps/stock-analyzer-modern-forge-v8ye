@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    {
+      "id": "input_node",
+      "type": "Input",
+      "label": "Scheduled Trigger / Manual Run",
+      "nodeCategory": "input"
+    },
+    {
+      "id": "stock_analyst_agent",
+      "type": "Agent",
+      "label": "Morning Stock Analyst Agent",
+      "nodeCategory": "agent"
+    },
+    {
+      "id": "output_node",
+      "type": "Output",
+      "label": "Email Delivery & Dashboard",
+      "nodeCategory": "end"
+    }
+  ],
+  "edges": [
+    {
+      "source": "input_node",
+      "target": "stock_analyst_agent"
+    },
+    {
+      "source": "stock_analyst_agent",
+      "target": "output_node"
+    }
+  ]
+}

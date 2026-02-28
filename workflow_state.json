@@ -1,0 +1,15 @@
+{
+  "agents": {
+    "morning_stock_analyst": {
+      "agent_id": "69a2885363d7518fcdafa1e0",
+      "name": "Morning Stock Analyst Agent",
+      "provider": "perplexity",
+      "model": "sonar-pro",
+      "has_schedule": true,
+      "schedule_id": "69a2885a25d4d77f732f17bc",
+      "cron_expression": "0 7 * * 1-5",
+      "timezone": "America/New_York",
+      "tools": ["GMAIL_SEND_EMAIL"]
+    }
+  }
+}

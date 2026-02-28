@@ -1,0 +1,24 @@
+{
+  "agent_name": "Morning Stock Analyst Agent",
+  "agent_id": "69a2885363d7518fcdafa1e0",
+  "agent_type": "text",
+  "accessor": "text",
+  "has_module_outputs": false,
+  "response_schema": {
+    "market_overview": "string",
+    "key_highlights": ["string"],
+    "stocks": [
+      {
+        "ticker": "string",
+        "company_name": "string",
+        "current_price": "string",
+        "daily_change": "string",
+        "percent_change": "string",
+        "context": "string"
+      }
+    ],
+    "email_status": "string",
+    "analysis_date": "string",
+    "forward_outlook": "string"
+  }
+}
