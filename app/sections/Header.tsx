@@ -12,7 +12,7 @@ export default function Header({ lastAnalysisTime, onOpenSettings }: HeaderProps
     <header className="border-b border-border px-8 py-6 flex items-center justify-between bg-card">
       <div>
         <h1 className="font-serif text-2xl tracking-widest uppercase font-light text-foreground">
-          Morning Stock Briefing
+          Market Pulse AM
         </h1>
         {lastAnalysisTime && (
           <p className="text-xs text-muted-foreground tracking-wider mt-1 font-sans">

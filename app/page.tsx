@@ -334,7 +334,7 @@ export default function Page() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground font-sans tracking-wider">
-                Powered by Morning Stock Analyst Agent
+                Powered by Market Pulse AM
               </p>
               <p className="text-xs text-muted-foreground font-sans mt-0.5">
                 Provider: Perplexity (sonar-pro) / Tools: Gmail
