@@ -11,6 +11,21 @@ import { useState } from 'react'
 import fetchWrapper from '@/lib/fetchWrapper'
 
 // ---------------------------------------------------------------------------
+// Safe fetch helper — wraps fetchWrapper to handle undefined returns
+// fetchWrapper returns undefined on network errors (and reports to parent),
+// so we must guard against calling .json() on undefined
+// ---------------------------------------------------------------------------
+
+async function safeFetch(...args: Parameters<typeof fetch>): Promise<Response | null> {
+  try {
+    const res = await fetchWrapper(...args)
+    return res ?? null
+  } catch {
+    return null
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -100,7 +115,8 @@ export async function listSchedules(params?: {
       skip: params?.skip,
       limit: params?.limit,
     })
-    const res = await fetchWrapper(`/api/scheduler?${qs}`)
+    const res = await safeFetch(`/api/scheduler?${qs}`)
+    if (!res) return { success: false, schedules: [], total: 0, error: 'Network error' }
     const data = await res.json()
     if (!data.success) return { success: false, schedules: [], total: 0, error: data.error }
     return { success: true, schedules: data.schedules || [], total: data.total ?? 0 }
@@ -133,7 +149,8 @@ export async function listSchedules(params?: {
 export async function getSchedule(scheduleId: string): Promise<{ success: boolean; schedule?: Schedule; error?: string }> {
   try {
     const qs = buildQuery({ action: 'get', scheduleId })
-    const res = await fetchWrapper(`/api/scheduler?${qs}`)
+    const res = await safeFetch(`/api/scheduler?${qs}`)
+    if (!res) return { success: false, error: 'Network error' }
     const data = await res.json()
     if (!data.success) return { success: false, error: data.error }
     const { success: _, error: __, details: ___, ...schedule } = data
@@ -153,7 +170,8 @@ export async function getSchedulesForAgent(agentId: string): Promise<{
 }> {
   try {
     const qs = buildQuery({ action: 'by-agent', agentId })
-    const res = await fetchWrapper(`/api/scheduler?${qs}`)
+    const res = await safeFetch(`/api/scheduler?${qs}`)
+    if (!res) return { success: false, schedules: [], webhooks: [], error: 'Network error' }
     const data = await res.json()
     if (!data.success) return { success: false, schedules: [], webhooks: [], error: data.error }
     return {
@@ -179,7 +197,8 @@ export async function getScheduleLogs(
       skip: params?.skip,
       limit: params?.limit,
     })
-    const res = await fetchWrapper(`/api/scheduler?${qs}`)
+    const res = await safeFetch(`/api/scheduler?${qs}`)
+    if (!res) return { success: false, executions: [], total: 0, error: 'Network error' }
     const data = await res.json()
     if (!data.success) return { success: false, executions: [], total: 0, error: data.error }
     return { success: true, executions: data.executions || [], total: data.total ?? 0 }
@@ -207,7 +226,8 @@ export async function getRecentExecutions(params?: {
       skip: params?.skip,
       limit: params?.limit,
     })
-    const res = await fetchWrapper(`/api/scheduler?${qs}`)
+    const res = await safeFetch(`/api/scheduler?${qs}`)
+    if (!res) return { success: false, executions: [], total: 0, error: 'Network error' }
     const data = await res.json()
     if (!data.success) return { success: false, executions: [], total: 0, error: data.error }
     return { success: true, executions: data.executions || [], total: data.total ?? 0 }
@@ -230,11 +250,12 @@ export async function createSchedule(params: {
   retry_delay?: number
 }): Promise<{ success: boolean; schedule?: Schedule; error?: string }> {
   try {
-    const res = await fetchWrapper('/api/scheduler', {
+    const res = await safeFetch('/api/scheduler', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'create', ...params }),
     })
+    if (!res) return { success: false, error: 'Network error' }
     const data = await res.json()
     if (!data.success) return { success: false, error: data.error }
     const { success: _, error: __, details: ___, ...schedule } = data
@@ -260,11 +281,12 @@ export async function pauseSchedule(scheduleId: string): Promise<ApiResult> {
     return { success: false, error: 'scheduleId is required' }
   }
   try {
-    const res = await fetchWrapper('/api/scheduler', {
+    const res = await safeFetch('/api/scheduler', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'pause', scheduleId }),
     })
+    if (!res) return { success: false, error: 'Network error' }
     const data = await res.json()
     
     // If API returns 400 with "already paused/inactive", treat as success (schedule is already in desired state)
@@ -309,11 +331,12 @@ export async function resumeSchedule(scheduleId: string): Promise<ApiResult> {
     return { success: false, error: 'scheduleId is required' }
   }
   try {
-    const res = await fetchWrapper('/api/scheduler', {
+    const res = await safeFetch('/api/scheduler', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'resume', scheduleId }),
     })
+    if (!res) return { success: false, error: 'Network error' }
     const data = await res.json()
     
     // If API returns 400 with "already active", treat as success (schedule is already in desired state)
@@ -400,11 +423,12 @@ export async function updateScheduleMessage(
 /** Manually trigger a schedule to run immediately (returns 202 async). */
 export async function triggerScheduleNow(scheduleId: string): Promise<ApiResult> {
   try {
-    const res = await fetchWrapper('/api/scheduler', {
+    const res = await safeFetch('/api/scheduler', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'trigger', scheduleId }),
     })
+    if (!res) return { success: false, error: 'Network error' }
     return res.json()
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Network error' }
@@ -418,11 +442,12 @@ export async function triggerScheduleNow(scheduleId: string): Promise<ApiResult>
 /** Permanently delete a schedule. */
 export async function deleteSchedule(scheduleId: string): Promise<ApiResult> {
   try {
-    const res = await fetchWrapper('/api/scheduler', {
+    const res = await safeFetch('/api/scheduler', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ scheduleId }),
     })
+    if (!res) return { success: false, error: 'Network error' }
     return res.json()
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Network error' }

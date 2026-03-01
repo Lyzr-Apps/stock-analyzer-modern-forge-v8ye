@@ -57,7 +57,11 @@ export default function ScheduleManager({ emailConfigured, scheduleId, onSchedul
   }
 
   useEffect(() => {
-    loadScheduleData()
+    // Delay initial load to avoid racing with backend startup
+    const timer = setTimeout(() => {
+      loadScheduleData()
+    }, 1500)
+    return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scheduleId])
 
